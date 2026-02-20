@@ -1,4 +1,8 @@
 <Solution>
+  <Folder Name="/Modules/">
+    <Project Path="src/JobsAI.Modules.Candidates/JobsAI.Modules.Candidates.csproj" />
+    <Project Path="src/JobsAI.Modules.Companies/JobsAI.Modules.Companies.csproj" />
+  </Folder>
   <Project Path="src/JobsAI.API/JobsAI.API.csproj" />
   <Project Path="src/JobsAI.Web/JobsAI.Web.csproj" />
 </Solution>
