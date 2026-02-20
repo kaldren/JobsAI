@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/JobsAI.API/JobsAI.API.csproj" />
+  <Project Path="src/JobsAI.Web/JobsAI.Web.csproj" />
+</Solution>
