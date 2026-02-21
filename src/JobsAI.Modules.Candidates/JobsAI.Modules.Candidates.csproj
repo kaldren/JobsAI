@@ -7,9 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Infrastructure\" />
-    <Folder Include="Application\" />
-    <Folder Include="Api\" />
+    <Folder Include="Application\Features\DeleteProfile\" />
+    <Folder Include="Application\Features\UpdateProfile\" />
+    <Folder Include="Domain\Events\" />
+    <Folder Include="Infrastructure\Persistence\" />
   </ItemGroup>
 
 </Project>

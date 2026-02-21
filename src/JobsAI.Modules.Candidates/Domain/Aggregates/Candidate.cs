@@ -1,4 +1,4 @@
-﻿namespace JobsAI.Modules.Candidates.Domain;
+﻿namespace JobsAI.Modules.Candidates.Domain.Aggregates;
 
 internal class Candidate
 {
