@@ -7,12 +7,23 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Application\Features\DeleteProfile\" />
-    <Folder Include="Application\Features\UpdateProfile\" />
+    <Compile Remove="Application\Features\UpdateProfile\**" />
+    <EmbeddedResource Remove="Application\Features\UpdateProfile\**" />
+    <None Remove="Application\Features\UpdateProfile\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Application\Dtos\" />
+    <Folder Include="Application\Features\CreateCV\" />
     <Folder Include="Domain\Events\" />
     <Folder Include="Domain\Exceptions\" />
+    <Folder Include="Domain\Entities\" />
     <Folder Include="Domain\ValueObjects\" />
     <Folder Include="Infrastructure\Persistence\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="LiteBus" Version="4.3.0" />
   </ItemGroup>
 
 </Project>
