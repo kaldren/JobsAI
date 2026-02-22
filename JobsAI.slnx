@@ -2,6 +2,7 @@
   <Folder Name="/Modules/">
     <Project Path="src/JobsAI.Modules.Candidates/JobsAI.Modules.Candidates.csproj" />
     <Project Path="src/JobsAI.Modules.Companies/JobsAI.Modules.Companies.csproj" />
+    <Project Path="src/JobsAI.Modules.Matching/JobsAI.Modules.Matching.csproj" Id="267161a2-aee2-4a7a-886a-b7bb0267ec50" />
   </Folder>
   <Project Path="src/JobsAI.API/JobsAI.API.csproj" />
   <Project Path="src/JobsAI.Web/JobsAI.Web.csproj" />
