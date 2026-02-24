@@ -23,23 +23,27 @@ The code follows Clean Architecture, Vertical Slice Architecture, CQRS, and Doma
 
 ```
 JobsAI.Modules.<ModuleName>/
-├── Api/                 # Public surface of the module (endpoints, contracts)
-├── Application/         # Use cases — orchestrates domain logic
-│   ├── Dtos/            # Data Transfer Objects for input/output
-│   └── Features/        # Vertical-slice feature folders (one folder per use case)
+├── <ModuleName>Module.cs # Module registration (DI extension method)
+├── Api/                  # Public surface of the module (endpoints, contracts)
+├── Application/          # Use cases — orchestrates domain logic
+│   ├── Abstractions/     # Interfaces (e.g., repository contracts)
+│   ├── Dtos/             # Data Transfer Objects for input/output
+│   └── Features/         # Vertical-slice feature folders (one folder per use case)
 │       └── <FeatureName>/
-├── Domain/              # Core business logic — no external dependencies
-│   ├── Aggregates/      # Aggregate roots
-│   ├── Entities/        # Entities owned by aggregates
-│   ├── ValueObjects/    # Immutable value objects
-│   ├── Events/          # Domain events
-│   └── Exceptions/      # Domain-specific exceptions
-└── Infrastructure/      # Technical concerns (persistence, external services)
-    └── Persistence/     # EF Core DbContext, configurations, repositories
+├── Domain/               # Core business logic — no external dependencies
+│   ├── Aggregates/       # Aggregate roots
+│   ├── Entities/         # Entities owned by aggregates
+│   ├── ValueObjects/     # Immutable value objects
+│   ├── Events/           # Domain events
+│   └── Exceptions/       # Domain-specific exceptions
+└── Infrastructure/       # Technical concerns (persistence, external services)
+    └── Data/             # EF Core DbContext, repositories
+        └── Configurations/ # EF Core entity type configurations and constants
 ```
 
+- `<ModuleName>Module.cs`: A `public static` class at the project root that exposes an `Add<ModuleName>Module` extension method on `IServiceCollection`. Registers the module's `DbContext`, repositories, and other services. Called from the API host's `Program.cs`.
 - `Domain`: Contains the core business logic, aggregates, entities, value objects, exceptions, and events.
-- `Application`: Contains the use cases implemented as features (using vertical slice architecture), interfaces, and DTOs.
+- `Application`: Contains the use cases implemented as features (using vertical slice architecture), interfaces (in `Abstractions/`), and DTOs.
 - `Infrastructure`: Contains the implementation of interfaces defined in the Application layer, such as repositories, external services, and database access.
 - `Api`: Contains the endpoints, routes, and any API-related code.
 
@@ -57,6 +61,19 @@ JobsAI.Modules.<ModuleName>/
 - The **Application** layer depends only on the Domain layer and defines use-case orchestration.
 - The **Infrastructure** layer implements interfaces defined in the Application or Domain layers (e.g., repositories).
 - The **Api** layer is the entry point into the module and depends on the Application layer.
+
+## Database Strategy
+
+All modules share a **single SQL Server database** (`JobsAIDb` connection string) but are isolated via **per-module schemas**:
+
+| Module | Schema |
+|---|---|
+| `Candidates` | `candidates` |
+
+- Each module owns its own `DbContext` (e.g., `CandidatesDbContext`) that calls `modelBuilder.HasDefaultSchema(...)` in `OnModelCreating`.
+- The schema name is defined as a constant in the module's `Infrastructure/Data/Configurations/ConfigurationConstants` class.
+- Entity type configurations live in `Infrastructure/Data/Configurations/` and reference table/schema constants from `ConfigurationConstants`.
+- Repository interfaces are defined in `Application/Abstractions/` and implemented in `Infrastructure/Data/`.
 
 ## Vertical Slice & CQRS Rules
 
@@ -89,6 +106,9 @@ Examples:
 - `JobsAI.Modules.Candidates.Domain.Aggregates`
 - `JobsAI.Modules.Candidates.Domain.ValueObjects`
 - `JobsAI.Modules.Candidates.Application.Features.CreateCV`
+- `JobsAI.Modules.Candidates.Application.Abstractions`
+- `JobsAI.Modules.Candidates.Infrastructure.Data`
+- `JobsAI.Modules.Candidates.Infrastructure.Data.Configurations`
 - `JobsAI.Modules.Candidates.Api`
 
 ### General
@@ -111,4 +131,6 @@ Examples:
 1. Create a new class library project: `JobsAI.Modules.<ModuleName>`.
 2. Target `net10.0` with nullable and implicit usings enabled.
 3. Create the four top-level folders: `Api/`, `Application/`, `Domain/`, `Infrastructure/`.
-4. Register the module in the `JobsAI.API` host.
+4. Add a `<ModuleName>Module.cs` at the project root with a `public static` `Add<ModuleName>Module` extension method that registers the module's `DbContext` (using the shared `JobsAIDb` connection string), repositories, and services.
+5. In the module's `DbContext`, call `modelBuilder.HasDefaultSchema("<module_schema>")` to isolate its tables.
+6. Add a project reference from `JobsAI.API` and call the registration extension in `Program.cs`.
