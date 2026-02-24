@@ -8,6 +8,7 @@ internal class CandidatesDbContext : DbContext
 {
     public DbSet<Candidate> Candidates => Set<Candidate>();
     public DbSet<CV> CVs => Set<CV>();
+    public DbSet<JobHistory> JobHistories => Set<JobHistory>();
 
     public CandidatesDbContext(DbContextOptions<CandidatesDbContext> options) : base(options)
     {

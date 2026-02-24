@@ -66,6 +66,36 @@ namespace JobsAI.Modules.Candidates.Infrastructure.Data.Migrations
                     b.ToTable("CVs", "candidates");
                 });
 
+            modelBuilder.Entity("JobsAI.Modules.Candidates.Domain.Entities.JobHistory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CandidateId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CompanyName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateOnly?>("EndDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Position")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("JobHistories", "candidates");
+                });
+
             modelBuilder.Entity("JobsAI.Modules.Candidates.Domain.Aggregates.Candidate", b =>
                 {
                     b.OwnsOne("JobsAI.Modules.Candidates.Domain.ValueObjects.Email", "Email", b1 =>
