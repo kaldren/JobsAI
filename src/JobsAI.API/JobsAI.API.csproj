@@ -15,4 +15,8 @@
     <PackageReference Include="Microsoft.Identity.Web.UI" Version="3.14.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\JobsAI.Modules.Candidates\JobsAI.Modules.Candidates.csproj" />
+  </ItemGroup>
+
 </Project>

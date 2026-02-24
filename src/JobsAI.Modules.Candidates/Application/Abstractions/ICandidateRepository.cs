@@ -1,8 +1,10 @@
-﻿using JobsAI.Modules.Candidates.Application.Dtos;
+﻿using JobsAI.Modules.Candidates.Domain.Aggregates;
 
 namespace JobsAI.Modules.Candidates.Application.Abstractions;
 
-public interface ICandidateRepository
+internal interface ICandidateRepository
 {
-    public Task UpdateCV(CVDto cv, CancellationToken cancellationToken = default);
+    Task<Candidate?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task AddAsync(Candidate candidate, CancellationToken cancellationToken = default);
+    Task SaveChangesAsync(CancellationToken cancellationToken = default);
 }
