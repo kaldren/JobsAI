@@ -1,7 +1,186 @@
 ﻿@page "/"
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Dashboard — JobsAI</PageTitle>
 
-<h1>Hello, world!</h1>
+<AuthorizeView>
+    <Authorized>
+        <!-- Greeting -->
+        <div class="animate-in animate-delay-1" style="margin-bottom: 2rem;">
+            <h1 style="font-size: 1.75rem; margin-bottom: 0.25rem;">
+                Welcome back, <span style="background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">@(context.User.Identity?.Name ?? "there")</span> 👋
+            </h1>
+            <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem;">Here's what's happening with your job search today.</p>
+        </div>
 
-Welcome to your new app.
+        <!-- Stats -->
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-lg-3 animate-in animate-delay-2">
+                <div class="glass-card stat-card indigo">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="stat-icon"><i class="bi bi-lightning-charge-fill"></i></div>
+                    </div>
+                    <div class="stat-value">3</div>
+                    <div class="stat-label mt-1">New Matches</div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3 animate-in animate-delay-3">
+                <div class="glass-card stat-card cyan">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="stat-icon"><i class="bi bi-eye-fill"></i></div>
+                    </div>
+                    <div class="stat-value">47</div>
+                    <div class="stat-label mt-1">Profile Views</div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3 animate-in animate-delay-4">
+                <div class="glass-card stat-card green">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="stat-icon"><i class="bi bi-file-earmark-text-fill"></i></div>
+                    </div>
+                    <div class="stat-value">@cvCount</div>
+                    <div class="stat-label mt-1">Active CVs</div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3 animate-in animate-delay-5">
+                <div class="glass-card stat-card warm">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="stat-icon"><i class="bi bi-graph-up-arrow"></i></div>
+                    </div>
+                    <div class="stat-value">92%</div>
+                    <div class="stat-label mt-1">Match Score</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3">
+            <!-- Recent Matches -->
+            <div class="col-lg-8 animate-in animate-delay-5">
+                <div class="glass-card" style="overflow: hidden;">
+                    <div class="section-header" style="padding: 1.25rem 1.25rem 0;">
+                        <div class="section-title">
+                            <i class="bi bi-lightning-charge-fill"></i> Latest AI Matches
+                        </div>
+                        <span class="badge-accent">This week</span>
+                    </div>
+
+                    @if (matches.Count == 0)
+                    {
+                        <div class="empty-state">
+                            <i class="bi bi-stars d-block"></i>
+                            <p>No matches yet. Complete your profile and add a CV to get started!</p>
+                        </div>
+                    }
+                    else
+                    {
+                        @foreach (var match in matches)
+                        {
+                            <div class="match-card">
+                                <div class="avatar avatar-sm" style="background: @match.AvatarGradient;">
+                                    @match.Company[0]
+                                </div>
+                                <div style="flex: 1; min-width: 0;">
+                                    <div style="font-weight: 600; font-size: 0.9rem; color: var(--text-primary);">@match.Title</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.15rem;">@match.Company · @match.Location</div>
+                                </div>
+                                <span class="match-score @(match.Score >= 85 ? "high" : "medium")">@match.Score%</span>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="col-lg-4 animate-in animate-delay-6">
+                <div class="section-title mb-3">
+                    <i class="bi bi-lightning"></i> Quick Actions
+                </div>
+                <div class="d-flex flex-column gap-2">
+                    <a href="profile" class="quick-action">
+                        <div class="qa-icon" style="background: rgba(99, 102, 241, 0.12); color: var(--accent-primary);">
+                            <i class="bi bi-person-fill-gear"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; font-size: 0.875rem;">Edit Profile</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">Update your information</div>
+                        </div>
+                        <i class="bi bi-chevron-right ms-auto" style="color: var(--text-muted); font-size: 0.8rem;"></i>
+                    </a>
+
+                    <a href="profile#cvs" class="quick-action">
+                        <div class="qa-icon" style="background: rgba(6, 182, 212, 0.12); color: var(--accent-tertiary);">
+                            <i class="bi bi-file-earmark-plus"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; font-size: 0.875rem;">Add a CV</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">Improve your match rate</div>
+                        </div>
+                        <i class="bi bi-chevron-right ms-auto" style="color: var(--text-muted); font-size: 0.8rem;"></i>
+                    </a>
+
+                    <a href="matches" class="quick-action">
+                        <div class="qa-icon" style="background: rgba(16, 185, 129, 0.12); color: var(--accent-success);">
+                            <i class="bi bi-stars"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; font-size: 0.875rem;">View Matches</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">3 new opportunities</div>
+                        </div>
+                        <i class="bi bi-chevron-right ms-auto" style="color: var(--text-muted); font-size: 0.8rem;"></i>
+                    </a>
+                </div>
+
+                <!-- Profile Completeness -->
+                <div class="glass-card mt-3" style="padding: 1.25rem;">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span style="font-weight: 600; font-size: 0.85rem; color: var(--text-primary);">Profile Strength</span>
+                        <span style="font-weight: 700; font-size: 0.85rem; color: var(--accent-tertiary);">@profileCompleteness%</span>
+                    </div>
+                    <div class="progress-bar-track">
+                        <div class="progress-bar-fill" style="width: @(profileCompleteness)%;"></div>
+                    </div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;">
+                        @if (profileCompleteness < 100)
+                        {
+                            <span>Add a CV to reach 100%</span>
+                        }
+                        else
+                        {
+                            <span>Your profile is complete! 🎉</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </Authorized>
+
+    <NotAuthorized>
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 70vh; text-align: center;">
+            <div class="animate-in animate-delay-1" style="margin-bottom: 2rem;">
+                <div style="font-size: 3.5rem; font-weight: 800; letter-spacing: -0.04em; line-height: 1.1;">
+                    Your next role,<br />
+                    <span style="background: var(--gradient-accent); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">found by AI.</span>
+                </div>
+            </div>
+            <p class="animate-in animate-delay-2" style="font-size: 1.1rem; color: var(--text-secondary); max-width: 480px; margin-bottom: 2rem;">
+                JobsAI matches you with opportunities that fit your skills. No applications, no noise — just relevant matches delivered to you.
+            </p>
+            <a href="authentication/login" class="btn-accent animate-in animate-delay-3" style="font-size: 1rem; padding: 0.75rem 2rem;">
+                <i class="bi bi-box-arrow-in-right me-2"></i> Get Started
+            </a>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private int cvCount = 1;
+    private int profileCompleteness = 75;
+
+    private List<MatchItem> matches =
+    [
+        new("Senior .NET Developer", "TechCorp", "Remote", 94, "linear-gradient(135deg, #6366f1, #8b5cf6)"),
+        new("Backend Engineer", "CloudScale", "Berlin, DE", 87, "linear-gradient(135deg, #06b6d4, #6366f1)"),
+        new("Full Stack Developer", "StartupAI", "London, UK", 82, "linear-gradient(135deg, #f59e0b, #ef4444)")
+    ];
+
+    private record MatchItem(string Title, string Company, string Location, int Score, string AvatarGradient);
+}

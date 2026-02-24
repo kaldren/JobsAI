@@ -1,15 +1,80 @@
 ﻿@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @inject NavigationManager Navigation
 
-<AuthorizeView>
-    <Authorized>
-        Hello, @context.User.Identity?.Name!
-        <button class="nav-link btn btn-link" @onclick="BeginLogOut">Log out</button>
-    </Authorized>
-    <NotAuthorized>
-        <a href="authentication/login">Log in</a>
-    </NotAuthorized>
-</AuthorizeView>
+<div class="login-display">
+    <AuthorizeView>
+        <Authorized>
+            <a href="profile" class="user-pill">
+                <div class="user-pill-avatar">
+                    @(context.User.Identity?.Name?.Substring(0, 1).ToUpper() ?? "U")
+                </div>
+                <span class="user-pill-name">@context.User.Identity?.Name</span>
+            </a>
+            <button class="btn-ghost btn-sm" @onclick="BeginLogOut">
+                <i class="bi bi-box-arrow-right"></i>
+            </button>
+        </Authorized>
+        <NotAuthorized>
+            <a href="authentication/login" class="btn-accent btn-sm">
+                <i class="bi bi-box-arrow-in-right me-1"></i> Sign in
+            </a>
+        </NotAuthorized>
+    </AuthorizeView>
+</div>
+
+<style>
+    .login-display {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .user-pill {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.3rem 0.75rem 0.3rem 0.3rem;
+        border-radius: 999px;
+        background: rgba(99, 102, 241, 0.08);
+        border: 1px solid rgba(99, 102, 241, 0.12);
+        text-decoration: none;
+        color: var(--text-primary);
+        transition: all 150ms ease;
+    }
+
+    .user-pill:hover {
+        background: rgba(99, 102, 241, 0.14);
+        border-color: rgba(99, 102, 241, 0.25);
+        color: var(--text-primary);
+    }
+
+    .user-pill-avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--gradient-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #fff;
+    }
+
+    .user-pill-name {
+        font-size: 0.8rem;
+        font-weight: 600;
+        max-width: 140px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .btn-sm {
+        padding: 0.35rem 0.85rem;
+        font-size: 0.8rem;
+    }
+</style>
 
 @code{
     public void BeginLogOut()

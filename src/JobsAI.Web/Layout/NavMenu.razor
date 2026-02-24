@@ -1,39 +1,54 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">JobsAI.Web</a>
-        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+﻿<div class="nav-brand">
+    <a href="" class="brand-link">
+        <div class="brand-icon">
+            <i class="bi bi-stars"></i>
+        </div>
+        <div class="brand-text">
+            Jobs<span class="brand-accent">AI</span>
+        </div>
+    </a>
+</div>
+
+<nav class="nav-menu">
+    <div class="nav-section-label">Main</div>
+
+    <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+        <i class="bi bi-house-door"></i>
+        <span>Dashboard</span>
+    </NavLink>
+
+    <NavLink class="nav-link" href="profile">
+        <i class="bi bi-person-badge"></i>
+        <span>My Profile</span>
+    </NavLink>
+
+    <div class="nav-section-label">Discover</div>
+
+    <NavLink class="nav-link" href="matches">
+        <i class="bi bi-lightning-charge"></i>
+        <span>AI Matches</span>
+        <span class="nav-badge">3</span>
+    </NavLink>
+
+    <NavLink class="nav-link" href="jobs">
+        <i class="bi bi-briefcase"></i>
+        <span>Browse Jobs</span>
+    </NavLink>
+
+    <div class="nav-section-label">Account</div>
+
+    <NavLink class="nav-link" href="settings">
+        <i class="bi bi-gear"></i>
+        <span>Settings</span>
+    </NavLink>
+</nav>
+
+<div class="nav-footer">
+    <div class="nav-footer-card">
+        <i class="bi bi-rocket-takeoff text-accent"></i>
+        <div class="nav-footer-text">
+            <strong>Complete your profile</strong>
+            <small>Add a CV to get matched</small>
+        </div>
     </div>
 </div>
-
-<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
-    <nav class="nav flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div>
-    </nav>
-</div>
-
-@code {
-    private bool collapseNavMenu = true;
-
-    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
-
-    private void ToggleNavMenu()
-    {
-        collapseNavMenu = !collapseNavMenu;
-    }
-}

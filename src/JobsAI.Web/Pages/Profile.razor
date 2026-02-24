@@ -1,0 +1,349 @@
+@page "/profile"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+
+<PageTitle>My Profile — JobsAI</PageTitle>
+
+<!-- Profile Header -->
+<div class="glass-card animate-in animate-delay-1" style="padding: 2rem; margin-bottom: 1.5rem;">
+    <div class="d-flex flex-wrap align-items-center gap-4">
+        <div class="avatar avatar-lg">
+            @(string.IsNullOrEmpty(firstName) ? "?" : firstName[0].ToString().ToUpper())@(string.IsNullOrEmpty(lastName) ? "" : lastName[0].ToString().ToUpper())
+        </div>
+        <div style="flex: 1; min-width: 200px;">
+            <h1 style="font-size: 1.5rem; margin: 0 0 0.25rem;">
+                @if (!string.IsNullOrWhiteSpace(firstName))
+                {
+                    @firstName @lastName
+                }
+                else
+                {
+                    <span style="color: var(--text-muted);">Your Name</span>
+                }
+            </h1>
+            <p style="margin: 0; color: var(--text-muted); font-size: 0.9rem;">
+                @if (!string.IsNullOrWhiteSpace(email))
+                {
+                    <i class="bi bi-envelope-fill me-1" style="color: var(--accent-primary);"></i> @email
+                }
+            </p>
+        </div>
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span style="font-weight: 600; font-size: 0.85rem; color: var(--text-primary);">Profile Strength</span>
+                <span class="badge-accent">@profileCompleteness%</span>
+            </div>
+            <div class="progress-bar-track" style="width: 180px;">
+                <div class="progress-bar-fill" style="width: @(profileCompleteness)%;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <!-- Personal Information -->
+    <div class="col-lg-7">
+        <div class="glass-card animate-in animate-delay-2" style="padding: 1.5rem;">
+            <div class="section-header">
+                <div class="section-title">
+                    <i class="bi bi-person-fill"></i> Personal Information
+                </div>
+                @if (!isEditingProfile)
+                {
+                    <button class="btn-ghost" @onclick="() => isEditingProfile = true">
+                        <i class="bi bi-pencil me-1"></i> Edit
+                    </button>
+                }
+            </div>
+
+            @if (isEditingProfile)
+            {
+                <EditForm Model="this" OnValidSubmit="SaveProfile" FormName="profileForm">
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <label class="form-label">First Name</label>
+                            <input type="text" class="form-control" @bind="firstName" placeholder="John" />
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label">Last Name</label>
+                            <input type="text" class="form-control" @bind="lastName" placeholder="Doe" />
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" @bind="email" placeholder="john@example.com" />
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label">Phone</label>
+                            <input type="tel" class="form-control" @bind="phone" placeholder="+1 234 567 890" />
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label">Date of Birth</label>
+                            <input type="date" class="form-control" @bind="dateOfBirth" />
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn-accent">
+                            <i class="bi bi-check-lg me-1"></i> Save Changes
+                        </button>
+                        <button type="button" class="btn-outline-accent" @onclick="CancelProfileEdit">
+                            Cancel
+                        </button>
+                    </div>
+                </EditForm>
+            }
+            else
+            {
+                <div class="d-flex flex-column gap-3">
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <div class="form-label" style="margin-bottom: 0.15rem;">First Name</div>
+                            <div style="font-weight: 600; color: var(--text-primary);">@(string.IsNullOrWhiteSpace(firstName) ? "—" : firstName)</div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-label" style="margin-bottom: 0.15rem;">Last Name</div>
+                            <div style="font-weight: 600; color: var(--text-primary);">@(string.IsNullOrWhiteSpace(lastName) ? "—" : lastName)</div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-label" style="margin-bottom: 0.15rem;">Email</div>
+                            <div style="font-weight: 600; color: var(--text-primary);">@(string.IsNullOrWhiteSpace(email) ? "—" : email)</div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-label" style="margin-bottom: 0.15rem;">Phone</div>
+                            <div style="font-weight: 600; color: var(--text-primary);">@(string.IsNullOrWhiteSpace(phone) ? "—" : phone)</div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-label" style="margin-bottom: 0.15rem;">Date of Birth</div>
+                            <div style="font-weight: 600; color: var(--text-primary);">@(dateOfBirth.HasValue ? dateOfBirth.Value.ToString("MMMM d, yyyy") : "—")</div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Profile Tips -->
+    <div class="col-lg-5">
+        <div class="glass-card animate-in animate-delay-3" style="padding: 1.5rem;">
+            <div class="section-title mb-3">
+                <i class="bi bi-lightbulb-fill"></i> Tips to Get Matched
+            </div>
+            <div class="d-flex flex-column gap-3">
+                @foreach (var tip in tips)
+                {
+                    <div class="d-flex gap-3 align-items-start">
+                        <div style="width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.8rem;
+                            background: @(tip.Done ? "rgba(16, 185, 129, 0.15)" : "rgba(99, 102, 241, 0.1)");
+                            color: @(tip.Done ? "var(--accent-success)" : "var(--accent-primary)");">
+                            <i class="bi @(tip.Done ? "bi-check-lg" : tip.Icon)"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; font-size: 0.85rem; color: @(tip.Done ? "var(--text-muted)" : "var(--text-primary)"); text-decoration: @(tip.Done ? "line-through" : "none");">
+                                @tip.Label
+                            </div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">@tip.Description</div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CV Section -->
+<div id="cvs" class="animate-in animate-delay-4" style="margin-top: 1.5rem;">
+    <div class="glass-card" style="padding: 1.5rem;">
+        <div class="section-header">
+            <div class="section-title">
+                <i class="bi bi-file-earmark-text-fill"></i> My CVs
+            </div>
+            <button class="btn-accent" style="font-size: 0.85rem;" @onclick="StartAddingCV">
+                <i class="bi bi-plus-lg me-1"></i> Add CV
+            </button>
+        </div>
+
+        @if (isAddingCV)
+        {
+            <div class="cv-item mb-3" style="border-color: var(--accent-primary); box-shadow: var(--shadow-glow);">
+                <h6 style="font-weight: 700; color: var(--accent-primary-hover); margin-bottom: 1rem;">
+                    <i class="bi bi-file-earmark-plus me-1"></i> New CV
+                </h6>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label">Title</label>
+                        <input type="text" class="form-control" @bind="newCVTitle" placeholder="e.g. Senior .NET Developer" />
+                        <div class="form-text">A descriptive title for this CV</div>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Summary</label>
+                        <textarea class="form-control" @bind="newCVSummary" rows="4"
+                                  placeholder="Describe your key skills, experience, and what kind of role you're looking for..."></textarea>
+                        <div class="form-text">This summary helps our AI find the best matches for you</div>
+                    </div>
+                </div>
+                <div class="d-flex gap-2 mt-3">
+                    <button class="btn-accent" style="font-size: 0.85rem;" @onclick="SaveCV">
+                        <i class="bi bi-check-lg me-1"></i> Save CV
+                    </button>
+                    <button class="btn-outline-accent" style="font-size: 0.85rem;" @onclick="CancelAddCV">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        }
+
+        @if (cvs.Count == 0 && !isAddingCV)
+        {
+            <div class="empty-state">
+                <i class="bi bi-file-earmark-plus d-block"></i>
+                <p style="margin: 0.5rem 0 0; font-size: 0.9rem;">No CVs yet. Add one to start getting matched with jobs!</p>
+            </div>
+        }
+        else
+        {
+            <div class="d-flex flex-column gap-3">
+                @foreach (var cv in cvs)
+                {
+                    <div class="cv-item">
+                        <div class="d-flex align-items-start justify-content-between gap-3">
+                            <div style="flex: 1; min-width: 0;">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <h6 style="font-weight: 700; margin: 0; color: var(--text-primary);">@cv.Title</h6>
+                                    @if (cv == cvs[0])
+                                    {
+                                        <span class="badge-success">Primary</span>
+                                    }
+                                </div>
+                                <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0.5rem 0 0; line-height: 1.6;">
+                                    @cv.Summary
+                                </p>
+                            </div>
+                            <div class="d-flex gap-1">
+                                <button class="btn-ghost" title="Edit" @onclick="() => EditCV(cv)">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn-ghost" title="Delete" style="color: var(--accent-danger);" @onclick="() => DeleteCV(cv)">
+                                    <i class="bi bi-trash3"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private string firstName = "Kaloyan";
+    private string lastName = "Drenski";
+    private string email = "kaloyan@example.com";
+    private string phone = "+359 888 123 456";
+    private DateTime? dateOfBirth = new DateTime(1995, 6, 15);
+
+    private bool isEditingProfile;
+    private string originalFirstName = "";
+    private string originalLastName = "";
+    private string originalEmail = "";
+    private string originalPhone = "";
+    private DateTime? originalDateOfBirth;
+
+    private bool isAddingCV;
+    private string newCVTitle = "";
+    private string newCVSummary = "";
+
+    private int profileCompleteness = 75;
+
+    private List<CVItem> cvs =
+    [
+        new(Guid.NewGuid(), "Senior .NET Developer", "8+ years of experience building enterprise applications with .NET, C#, Azure, and SQL Server. Passionate about clean architecture, DDD, and building scalable distributed systems.")
+    ];
+
+    private List<TipItem> tips =
+    [
+        new("Complete your profile", "Fill in all your personal details", "bi-person-fill", true),
+        new("Add your first CV", "Upload or write a CV to get matched", "bi-file-earmark-text", true),
+        new("Add a second CV", "Target different roles with tailored CVs", "bi-files", false),
+        new("Keep it updated", "Fresh profiles get 3x more matches", "bi-arrow-repeat", false)
+    ];
+
+    private void SaveProfile()
+    {
+        isEditingProfile = false;
+        CalculateCompleteness();
+    }
+
+    private void CancelProfileEdit()
+    {
+        firstName = originalFirstName;
+        lastName = originalLastName;
+        email = originalEmail;
+        phone = originalPhone;
+        dateOfBirth = originalDateOfBirth;
+        isEditingProfile = false;
+    }
+
+    private void StartAddingCV()
+    {
+        originalFirstName = firstName;
+        originalLastName = lastName;
+        originalEmail = email;
+        originalPhone = phone;
+        originalDateOfBirth = dateOfBirth;
+        isAddingCV = true;
+        newCVTitle = "";
+        newCVSummary = "";
+    }
+
+    private void SaveCV()
+    {
+        if (!string.IsNullOrWhiteSpace(newCVTitle) && !string.IsNullOrWhiteSpace(newCVSummary))
+        {
+            cvs.Add(new CVItem(Guid.NewGuid(), newCVTitle.Trim(), newCVSummary.Trim()));
+            isAddingCV = false;
+            CalculateCompleteness();
+        }
+    }
+
+    private void CancelAddCV()
+    {
+        isAddingCV = false;
+    }
+
+    private void EditCV(CVItem cv)
+    {
+        newCVTitle = cv.Title;
+        newCVSummary = cv.Summary;
+        cvs.Remove(cv);
+        isAddingCV = true;
+    }
+
+    private void DeleteCV(CVItem cv)
+    {
+        cvs.Remove(cv);
+        CalculateCompleteness();
+    }
+
+    private void CalculateCompleteness()
+    {
+        int score = 0;
+        if (!string.IsNullOrWhiteSpace(firstName)) score += 15;
+        if (!string.IsNullOrWhiteSpace(lastName)) score += 15;
+        if (!string.IsNullOrWhiteSpace(email)) score += 20;
+        if (!string.IsNullOrWhiteSpace(phone)) score += 10;
+        if (dateOfBirth.HasValue) score += 10;
+        if (cvs.Count > 0) score += 30;
+        profileCompleteness = Math.Min(score, 100);
+    }
+
+    protected override void OnInitialized()
+    {
+        originalFirstName = firstName;
+        originalLastName = lastName;
+        originalEmail = email;
+        originalPhone = phone;
+        originalDateOfBirth = dateOfBirth;
+        CalculateCompleteness();
+    }
+
+    private record CVItem(Guid Id, string Title, string Summary);
+    private record TipItem(string Label, string Description, string Icon, bool Done);
+}
