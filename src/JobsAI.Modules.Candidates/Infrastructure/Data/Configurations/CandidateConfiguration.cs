@@ -54,7 +54,8 @@ internal class CandidateConfiguration : IEntityTypeConfiguration<Candidate>
             .HasForeignKey(cv => cv.CandidateId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.Metadata.FindNavigation(nameof(Candidate.CVs))!
-            .SetPropertyAccessMode(PropertyAccessMode.Field);
+        builder.Navigation(c => c.CVs)
+            .HasField("_cvs")
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 }
