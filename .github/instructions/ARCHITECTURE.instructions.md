@@ -1,13 +1,114 @@
 # Architecture
-JobsAI is built using modular monolith architecture with Domain-Driven Design (DDD) principles. The project is organized into modules that encapsulate specific business domains, and each module follows the clean architecture principles. This approach allows for better separation of concerns, maintainability, and scalability of the codebase.
+
+JobsAI is built using a **Modular Monolith** architecture with Domain-Driven Design (DDD) principles. The project is organized into modules that encapsulate specific business domains, and each module follows Clean Architecture principles. This approach allows for better separation of concerns, maintainability, and scalability of the codebase.
+
+## Host Projects
+
+| Project | Role |
+|---|---|
+| `JobsAI.API` | ASP.NET Core Web API host. Registers modules, configures authentication (Microsoft Identity / JWT Bearer), and exposes HTTP endpoints. |
+| `JobsAI.Web` | Blazor WebAssembly front-end. Uses MSAL for authentication. |
+
+## Module Projects
+
+Each module lives in its own class library project following the naming convention `JobsAI.Modules.<ModuleName>`:
+
+- `JobsAI.Modules.Candidates` – Candidate profiles, CVs, and related workflows.
+- `JobsAI.Modules.Companies` – Company profiles and job postings.
+- `JobsAI.Modules.Matching` – AI-driven matching between candidates and jobs.
 
 # Code Structure
-The code is following the Clean Architecture, Vertical Architecture, CQRS, and Domain-Driven Design (DDD) principles. Each module has four core folders:
+
+The code follows Clean Architecture, Vertical Slice Architecture, CQRS, and Domain-Driven Design (DDD) principles. Each module has four core folders with dependencies pointing inward — outer layers depend on inner layers, never the reverse.
+
+```
+JobsAI.Modules.<ModuleName>/
+├── Api/                 # Public surface of the module (endpoints, contracts)
+├── Application/         # Use cases — orchestrates domain logic
+│   ├── Dtos/            # Data Transfer Objects for input/output
+│   └── Features/        # Vertical-slice feature folders (one folder per use case)
+│       └── <FeatureName>/
+├── Domain/              # Core business logic — no external dependencies
+│   ├── Aggregates/      # Aggregate roots
+│   ├── Entities/        # Entities owned by aggregates
+│   ├── ValueObjects/    # Immutable value objects
+│   ├── Events/          # Domain events
+│   └── Exceptions/      # Domain-specific exceptions
+└── Infrastructure/      # Technical concerns (persistence, external services)
+    └── Persistence/     # EF Core DbContext, configurations, repositories
+```
+
 - `Domain`: Contains the core business logic, aggregates, entities, value objects, exceptions, and events.
 - `Application`: Contains the use cases implemented as features (using vertical slice architecture), interfaces, and DTOs.
-- `Infrastructure`: Contains the implementation of interfaces defined in the application layer, such as repositories, external services, and database access.
-- `Api`: Contains the controllers, routes, and any API-related code.
+- `Infrastructure`: Contains the implementation of interfaces defined in the Application layer, such as repositories, external services, and database access.
+- `Api`: Contains the endpoints, routes, and any API-related code.
 
-## Code rules
-- Implement Commands and Queries inside the Features folder of the Application layer.
+## DDD (Domain-Driven Design) Rules
+
+- **Aggregates** are the consistency boundaries. Each aggregate root lives in `Domain/Aggregates/` and controls access to its child entities.
+- **Entities** live in `Domain/Entities/` and are always accessed through their owning aggregate.
+- **Value Objects** live in `Domain/ValueObjects/` and are modeled as C# `record` types with `init` properties and constructor validation.
+- **Domain Events** live in `Domain/Events/` and represent things that happened in the domain.
+- **Domain Exceptions** live in `Domain/Exceptions/` and represent domain rule violations.
+
+## Clean Architecture Rules
+
+- The **Domain** layer has zero dependencies on other layers or external packages.
+- The **Application** layer depends only on the Domain layer and defines use-case orchestration.
+- The **Infrastructure** layer implements interfaces defined in the Application or Domain layers (e.g., repositories).
+- The **Api** layer is the entry point into the module and depends on the Application layer.
+
+## Vertical Slice & CQRS Rules
+
+- Each use case (command or query) gets its own folder under `Application/Features/<FeatureName>/`.
+- Implement Commands and Queries inside the `Features` folder of the Application layer.
 - Each Command or Query should have a nested (not a separate class!) `Handler` class that implements the logic for handling that specific Command or Query.
+- **LiteBus** is used as the in-process message bus for dispatching commands and queries.
+
+## Coding Conventions
+
+### Access Modifiers
+
+- Module-internal types (aggregates, entities, handlers, API classes) are marked `internal` to enforce module encapsulation. Only types that must be shared across modules are `public`.
+
+### Domain Modeling
+
+- **Aggregate roots**: regular `class` with `private set` properties and a constructor that enforces invariants. Use `Guid` for identifiers.
+- **Value objects**: `record` type with `init` properties and constructor validation.
+- **Entities**: regular `class` with properties appropriate to the entity.
+
+### Namespaces
+
+Namespaces mirror the folder structure:
+
+```
+JobsAI.Modules.<ModuleName>.<Layer>.<Subfolder>
+```
+
+Examples:
+- `JobsAI.Modules.Candidates.Domain.Aggregates`
+- `JobsAI.Modules.Candidates.Domain.ValueObjects`
+- `JobsAI.Modules.Candidates.Application.Features.CreateCV`
+- `JobsAI.Modules.Candidates.Api`
+
+### General
+
+- Target: **.NET 10**, C# 14.
+- `<Nullable>enable</Nullable>` and `<ImplicitUsings>enable</ImplicitUsings>` are enabled in all projects.
+- Use file-scoped namespaces.
+- Keep `using` directives at the top of the file.
+
+## Adding a New Feature
+
+1. **Create a feature folder** under `Application/Features/<FeatureName>/`.
+2. **Define the command or query** class with a nested `Handler` class (implement the appropriate LiteBus interface).
+3. **Add any new domain types** (aggregates, entities, value objects, events, exceptions) in the corresponding `Domain/` subfolder.
+4. **Add infrastructure implementations** (repository, persistence config) in `Infrastructure/`.
+5. **Expose the endpoint** in the `Api/` layer.
+
+## Adding a New Module
+
+1. Create a new class library project: `JobsAI.Modules.<ModuleName>`.
+2. Target `net10.0` with nullable and implicit usings enabled.
+3. Create the four top-level folders: `Api/`, `Application/`, `Domain/`, `Infrastructure/`.
+4. Register the module in the `JobsAI.API` host.
